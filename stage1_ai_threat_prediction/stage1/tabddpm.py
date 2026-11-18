@@ -262,7 +262,7 @@ class TabDDPMPreprocessor:
 
         # If already has all 11 columns:
         if all(col in df.columns for col in TABDDPM_FEATURES):
-            arr = df[TABDDPM_FEATURES].apply(pd.to_numeric, errors="coerce").fillna(0.0).to_numpy(np.float32)
+            arr = np.array(df[TABDDPM_FEATURES].apply(pd.to_numeric, errors="coerce").fillna(0.0).to_numpy(np.float32), copy=True)
             return arr
 
         # Otherwise synthesize from available network flow columns:

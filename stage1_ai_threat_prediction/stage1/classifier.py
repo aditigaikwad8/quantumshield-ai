@@ -70,9 +70,9 @@ class FlowClassifier:
                 if col not in df.columns:
                     df[col] = np.nan
             sub = df[self.feature_columns].apply(pd.to_numeric, errors="coerce")
-            arr = sub.to_numpy(dtype=np.float32)
+            arr = np.array(sub.to_numpy(dtype=np.float32), copy=True)
         else:
-            arr = np.asarray(df_or_arr, dtype=np.float32)
+            arr = np.array(df_or_arr, dtype=np.float32, copy=True)
             if arr.ndim == 1:
                 arr = arr.reshape(1, -1)
             if arr.shape[1] != len(self.feature_columns):
@@ -81,6 +81,10 @@ class FlowClassifier:
                 k = min(arr.shape[1], len(self.feature_columns))
                 out[:, :k] = arr[:, :k]
                 arr = out
+
+        # Ensure array is a writeable copy before in-place mutation
+        if not arr.flags.writeable:
+            arr = arr.copy()
 
         # Handle +/- infinity as NaN (LightGBM natively handles NaNs)
         arr[np.isneginf(arr)] = np.nan
